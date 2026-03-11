@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Journal AI Analysis — Example Session</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --card: #0d1218;
+    --border: #1a2535;
+    --border-bright: #243346;
+    --text: #c8d8e8;
+    --text-dim: #5a7a9a;
+    --text-bright: #e8f4ff;
+    --green: #00e5a0;
+    --green-dim: #00e5a015;
+    --red: #ff4455;
+    --red-dim: #ff445510;
+    --yellow: #ffc940;
+    --yellow-dim: #ffc94010;
+    --blue: #4da6ff;
+    --blue-dim: #4da6ff10;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(77,166,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(77,166,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--green);
+  }
+
+  h1 {
+    font-family: var(--sans);
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 800;
+    color: var(--text-bright);
+    line-height: 1.1;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+  }
+
+  h1 span {
+    color: var(--green);
+  }
+
+  .header-sub {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    max-width: 600px;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .header-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .header-stat-val {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  .header-stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ─── SECTION ─── */
+  section {
+    padding: 56px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  h2 {
+    font-family: var(--sans);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.5px;
+  }
+
+  h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+  }
+
+  .card-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .card-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  @media (max-width: 700px) {
+    .card-grid-2, .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; }
+  }
+
+  /* ─── STAT CARDS ─── */
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+  }
+
+  .stat-card-val {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+  }
+
+  .stat-card-val.green { color: var(--green); }
+  .stat-card-val.red { color: var(--red); }
+  .stat-card-val.yellow { color: var(--yellow); }
+  .stat-card-val.blue { color: var(--blue); }
+
+  .stat-card-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ─── TIME WINDOWS TABLE ─── */
+  .time-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  .time-table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .time-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .time-table tr:last-child td { border-bottom: none; }
+
+  .time-table tr.prime { background: rgba(0,229,160,0.04); }
+  .time-table tr.avoid { background: rgba(255,68,85,0.04); }
+  .time-table tr.marginal { background: rgba(255,201,64,0.03); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+
+  .badge-prime { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,229,160,0.2); }
+  .badge-avoid { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,68,85,0.2); }
+  .badge-valid { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,166,255,0.2); }
+  .badge-marginal { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(255,201,64,0.2); }
+
+  .wr-high { color: var(--green); font-weight: 700; }
+  .wr-low { color: var(--red); font-weight: 700; }
+  .wr-mid { color: var(--yellow); }
+
+  /* ─── RULE BARS ─── */
+  .rule-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rule-row:last-child { border-bottom: none; }
+
+  .rule-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    width: 160px;
+    flex-shrink: 0;
+  }
+
+  .rule-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .rule-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .rule-bar.pos { background: var(--green); }
+  .rule-bar.neg { background: var(--red); }
+
+  .rule-edge {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    width: 60px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .rule-edge.pos { color: var(--green); }
+  .rule-edge.neg { color: var(--red); }
+
+  .rule-conf {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    width: 100px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  /* ─── CHECKLIST ─── */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: rgba(77,166,255,0.03); }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border-bright);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .check-box.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .check-box.checked::after {
+    content: '✓';
+    font-size: 11px;
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .check-content { flex: 1; }
+
+  .check-title {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+  }
+
+  .check-detail {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .check-detail span { color: var(--green); }
+  .check-detail span.red { color: var(--red); }
+  .check-detail span.yellow { color: var(--yellow); }
+
+  /* ─── INSIGHT BLOCKS ─── */
+  .insight {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 0 4px 4px 0;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+
+  .insight.red { border-left-color: var(--red); }
+  .insight.yellow { border-left-color: var(--yellow); }
+  .insight.blue { border-left-color: var(--blue); }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--green);
+  }
+
+  .insight.red .insight-label { color: var(--red); }
+  .insight.yellow .insight-label { color: var(--yellow); }
+  .insight.blue .insight-label { color: var(--blue); }
+
+  .insight-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .insight-text strong { color: var(--text-bright); }
+
+  /* ─── CONVERSATION FLOW ─── */
+  .flow-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .flow-wrap::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 24px;
+    bottom: 24px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 16px 0;
+  }
+
+  .flow-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-bright);
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow-dot.active {
+    border-color: var(--green);
+    background: rgba(0,229,160,0.08);
+    color: var(--green);
+  }
+
+  .flow-content { padding-top: 8px; }
+
+  .flow-title {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+  }
+
+  .flow-desc {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .flow-desc em {
+    color: var(--text);
+    font-style: normal;
+    font-style: italic;
+  }
+
+  /* ─── THE RULE ─── */
+  .big-rule {
+    background: var(--card);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .big-rule::before {
+    content: '4';
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 240px;
+    font-weight: 700;
+    color: rgba(0,229,160,0.04);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .big-rule-number {
+    font-family: var(--mono);
+    font-size: 80px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .big-rule-label {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 12px;
+  }
+
+  .big-rule-sub {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 48px 0;
+    text-align: center;
+  }
+
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .footer-text a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 32px 0;
+  }
+
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  /* ─── RSI TABLE ─── */
+  .rsi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) { .rsi-grid { grid-template-columns: 1fr; } }
+
+  .rsi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .rsi-card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+
+  .rsi-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .rsi-row:last-child { border-bottom: none; }
+
+  /* animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    animation: fadeUp 0.6s ease forwards;
+    opacity: 0;
+  }
+
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header class="fade-up">
+    <div class="header-tag">Trade Journal AI Analysis</div>
+    <h1>From JSON to<br><span>Trading Edge</span></h1>
+    <p class="header-sub">
+      A real analysis session — 43 LBT trades, one JSON export, one conversation.<br>
+      This is what the data surfaces when you ask the right questions.
+    </p>
+    <div class="header-stats">
+      <div class="header-stat">
+        <div class="header-stat-val">43</div>
+        <div class="header-stat-label">LBT Trades</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-val">71.4%</div>
+        <div class="header-stat-label">Win Rate</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-val">$10,857</div>
+        <div class="header-stat-label">Total P&L</div>
+      </div>
+      <div class="header-stat">
+        <div class="header-stat-val">2.95</div>
+        <div class="header-stat-label">Profit Factor</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HEADLINE FINDING -->
+  <section class="fade-up delay-1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Headline Finding</h2>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">Key Discovery</div>
+      <div class="insight-text">
+        <strong>Exit method is the single biggest lever in P&L.</strong> Limit exits averaged $484/trade at 100% win rate. Stop exits averaged −$150/trade at 48% win rate. That $634 gap per trade — not entries, not setups — is what separates a $125k/year system from a losing one.
+      </div>
+    </div>
+
+    <div class="insight blue">
+      <div class="insight-label">The Core Reframe</div>
+      <div class="insight-text">
+        <strong>The morning pop isn't the trade. It's the setup.</strong> The afternoon pop isn't the trade. It's the setup. You're not trying to catch the move — you're waiting for it to exhaust itself, then fading the reversal off what it left behind. The pop creates your conditions.
+      </div>
+    </div>
+
+    <div class="insight red">
+      <div class="insight-label">The $8,599 Problem</div>
+      <div class="insight-text">
+        <strong>Winners captured only 47.3% of available MFE.</strong> $8,599 was left on the table across winning trades alone — nearly equal to the entire dataset P&L. Limit exits captured 82.5%. Stop exits captured 15.0%. The system works. Exit execution is the leak.
+      </div>
+    </div>
+  </section>
+
+  <!-- TIME WINDOWS -->
+  <section class="fade-up delay-2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Time Windows — NYSE Day (CST)</h2>
+    </div>
+
+    <h3>Entry Performance by Session</h3>
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="time-table">
+        <thead>
+          <tr>
+            <th>Window (CST)</th>
+            <th>Session</th>
+            <th>Trades</th>
+            <th>Win Rate</th>
+            <th>Avg $</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--text-dim)">08:30–09:00</td>
+            <td style="color:var(--text-dim)">Open Volatility</td>
+            <td style="color:var(--text-dim)">—</td>
+            <td style="color:var(--text-dim)">—</td>
+            <td style="color:var(--text-dim)">—</td>
+            <td><span class="badge badge-marginal">NO DATA</span></td>
+          </tr>
+          <tr class="prime">
+            <td>09:00–09:30</td>
+            <td>Open Momentum</td>
+            <td>2</td>
+            <td class="wr-high">100%</td>
+            <td class="wr-high">$812</td>
+            <td><span class="badge badge-prime">✅ PRIME</span></td>
+          </tr>
+          <tr>
+            <td>09:30–10:00</td>
+            <td>Early Session</td>
+            <td>5</td>
+            <td class="wr-mid">80%</td>
+            <td>$135</td>
+            <td><span class="badge badge-valid">✓ VALID</span></td>
+          </tr>
+          <tr class="avoid">
+            <td>10:00–10:30</td>
+            <td>Mid Morning</td>
+            <td>3</td>
+            <td class="wr-low">33%</td>
+            <td class="wr-low">−$218</td>
+            <td><span class="badge badge-avoid">🚫 AVOID</span></td>
+          </tr>
+          <tr class="prime">
+            <td>10:30–11:00</td>
+            <td>Late Morning</td>
+            <td>4</td>
+            <td class="wr-high">100%</td>
+            <td class="wr-high">$562</td>
+            <td><span class="badge badge-prime">✅ PRIME</span></td>
+          </tr>
+          <tr class="avoid">
+            <td>11:00–12:00</td>
+            <td>Midday / Lunch</td>
+            <td>7</td>
+            <td class="wr-low">29%</td>
+            <td class="wr-low">−$197</td>
+            <td><span class="badge badge-avoid">🚫 HARD NO</span></td>
+          </tr>
+          <tr>
+            <td>12:00–13:00</td>
+            <td>Early Afternoon</td>
+            <td>8</td>
+            <td class="wr-mid">75%</td>
+            <td>$392</td>
+            <td><span class="badge badge-valid">✓ VALID</span></td>
+          </tr>
+          <tr class="prime">
+            <td>13:00–14:00</td>
+            <td>Power Hour Buildup</td>
+            <td>11</td>
+            <td class="wr-high">91%</td>
+            <td class="wr-high">$452</td>
+            <td><span class="badge badge-prime">✅ PRIME</span></td>
+          </tr>
+          <tr class="marginal">
+            <td>14:00–15:00</td>
+            <td>Power Hour / Close</td>
+            <td>2</td>
+            <td class="wr-mid">50%</td>
+            <td>$118</td>
+            <td><span class="badge badge-marginal">△ MARGINAL</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-label">Natural 3-Trade Day</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="card-grid card-grid-3">
+      <div class="stat-card" style="border-top: 2px solid var(--green);">
+        <div class="stat-card-val green">Trade 1</div>
+        <div class="stat-card-label">09:00–09:30 CST</div>
+        <div style="margin-top:8px; font-family:var(--mono); font-size:11px; color:var(--text-dim)">Morning pop exhausted.<br>First reversal setup.</div>
+      </div>
+      <div class="stat-card" style="border-top: 2px solid var(--green);">
+        <div class="stat-card-val green">Trade 2</div>
+        <div class="stat-card-label">10:30–11:00 CST</div>
+        <div style="margin-top:8px; font-family:var(--mono); font-size:11px; color:var(--text-dim)">Second morning move<br>exhausted. Clean fade.</div>
+      </div>
+      <div class="stat-card" style="border-top: 2px solid var(--green);">
+        <div class="stat-card-val green">Trade 3</div>
+        <div class="stat-card-label">13:00–14:00 CST</div>
+        <div style="margin-top:8px; font-family:var(--mono); font-size:11px; color:var(--text-dim)">Afternoon push exhausts.<br>Best window of the day.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADX -->
+  <section class="fade-up">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>ADX — The Shape, Not the Number</h2>
+    </div>
+
+    <div class="insight yellow">
+      <div class="insight-label">The Key Insight</div>
+      <div class="insight-text">
+        ADX measures trend <strong>strength</strong>, not direction. You're not watching for ADX to reach 20 — you're watching for the <strong>peak and rollover</strong>. When ADX curls down from 25-35 after the pop, that's confirmation the directional pressure is fading. That rollover is your entry window.
+      </div>
+    </div>
+
+    <h3 style="margin-top:24px;">Performance by ADX Level</h3>
+    <div class="card-grid card-grid-3">
+      <div class="stat-card" style="border: 1px solid var(--red); opacity:0.7">
+        <div class="stat-card-val red">65% WR</div>
+        <div class="stat-card-label">ADX Below 20</div>
+        <div style="margin-top:12px; font-family:var(--mono); font-size:11px; color:var(--text-dim); line-height:1.6">
+          23 trades · avg $165<br>
+          No meaningful trend.<br>
+          <span style="color:var(--red)">Noise. Sit out.</span>
+        </div>
+      </div>
+      <div class="stat-card" style="border: 1px solid var(--green);">
+        <div class="stat-card-val green">100% WR</div>
+        <div class="stat-card-label">ADX 20–25</div>
+        <div style="margin-top:12px; font-family:var(--mono); font-size:11px; color:var(--text-dim); line-height:1.6">
+          6 trades · avg $583<br>
+          Trend developing, not<br>
+          <span style="color:var(--green)">overextended. Prime zone.</span>
+        </div>
+      </div>
+      <div class="stat-card" style="border: 1px solid var(--border-bright);">
+        <div class="stat-card-val">69% WR</div>
+        <div class="stat-card-label">ADX 25+</div>
+        <div style="margin-top:12px; font-family:var(--mono); font-size:11px; color:var(--text-dim); line-height:1.6">
+          13 trades · avg $285<br>
+          Valid but watch for<br>
+          <span style="color:var(--yellow)">overextension on reversals.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; padding: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 4px; font-family: var(--mono); font-size: 12px; color: var(--text-dim); line-height: 1.8;">
+      <span style="color: var(--yellow)">⚠ SAMPLE SIZE NOTE:</span> ADX 20–25 shows 100% WR on only 6 trades. This is a <span style="color:var(--yellow)">promising signal, not a confirmed finding.</span> Minimum 15–20 trades needed in this bucket before acting on the magnitude. The direction is backed by theory — confirm with more LBT data.
+    </div>
+  </section>
+
+  <!-- RULE EDGE -->
+  <section class="fade-up">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Rule Edge Analysis</h2>
+    </div>
+
+    <h3>Win Rate Delta — Rule Present vs Absent</h3>
+    <div class="card" style="padding: 24px 24px 8px;">
+
+      <div class="rule-row">
+        <div class="rule-name">Cloud Align</div>
+        <div class="rule-bar-wrap"><div class="rule-bar pos" style="width:49%"></div></div>
+        <div class="rule-edge pos">+24.6%</div>
+        <div class="rule-conf" style="color:var(--green)">CONFIRMED</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-name">RSI Extreme</div>
+        <div class="rule-bar-wrap"><div class="rule-bar pos" style="width:49%"></div></div>
+        <div class="rule-edge pos">+24.4%</div>
+        <div class="rule-conf" style="color:var(--green)">CONFIRMED</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-name">MACD Cross</div>
+        <div class="rule-bar-wrap"><div class="rule-bar pos" style="width:40%"></div></div>
+        <div class="rule-edge pos">+20.2%</div>
+        <div class="rule-conf" style="color:var(--yellow)">HYPOTHESIS</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-name">1st Candle 10EMA</div>
+        <div class="rule-bar-wrap"><div class="rule-bar pos" style="width:39%"></div></div>
+        <div class="rule-edge pos">+19.3%</div>
+        <div class="rule-conf" style="color:var(--yellow)">HYPOTHESIS</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-name">Chan Retest</div>
+        <div class="rule-bar-wrap"><div class="rule-bar pos" style="width:21%"></div></div>
+        <div class="rule-edge pos">+10.6%</div>
+        <div class="rule-conf" style="color:var(--green)">CONFIRMED</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-name">15m Cloud</div>
+        <div class="rule-bar-wrap"><div class="rule-bar neg" style="width:17%"></div></div>
+        <div class="rule-edge neg">−8.3%</div>
+        <div class="rule-conf" style="color:var(--red)">CONFIRMED ⚠</div>
+      </div>
+
+    </div>
+
+    <div class="insight red" style="margin-top:16px;">
+      <div class="insight-label">The 15m Cloud Problem</div>
+      <div class="insight-text">
+        For a <strong>reversal trader</strong>, 15m cloud alignment means the move is still running in full force — exactly when you don't want to fade it. This rule was designed for continuation traders. In your system it may be filtering you INTO bad entries and OUT OF good ones. <strong>Treat as neutral-to-negative until BT data proves otherwise.</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSI BY DIRECTION -->
+  <section class="fade-up">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>RSI Entry Filter — Direction Matters</h2>
+    </div>
+
+    <div class="rsi-grid">
+      <div class="rsi-card">
+        <div class="rsi-card-header" style="color:var(--green)">LONG ENTRIES</div>
+        <div class="rsi-row">
+          <span>RSI 50–70</span>
+          <span><span class="wr-high">83% WR</span> · avg $335</span>
+        </div>
+        <div class="rsi-row">
+          <span>RSI 30–50</span>
+          <span><span class="wr-mid">75% WR</span> · avg $350</span>
+        </div>
+        <div style="padding:12px 16px; font-family:var(--mono); font-size:11px; color:var(--text-dim)">
+          Longs are forgiving across the RSI range. Both zones valid.
+        </div>
+      </div>
+      <div class="rsi-card">
+        <div class="rsi-card-header" style="color:var(--blue)">SHORT ENTRIES</div>
+        <div class="rsi-row">
+          <span>RSI &lt; 30</span>
+          <span><span class="wr-mid">67% WR</span> · avg $655</span>
+        </div>
+        <div class="rsi-row">
+          <span>RSI 30–50</span>
+          <span><span class="wr-mid">62% WR</span> · avg $171</span>
+        </div>
+        <div class="rsi-row" style="background:var(--red-dim)">
+          <span>RSI 50–70</span>
+          <span><span class="wr-low">50% WR</span> · avg −$191 ✗</span>
+        </div>
+        <div style="padding:12px 16px; font-family:var(--mono); font-size:11px; color:var(--red)">
+          Do not short into RSI 50–70. You need extreme readings on shorts.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE 4 TRADE RULE -->
+  <section class="fade-up">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>The Rule That Changes Everything</h2>
+    </div>
+
+    <div class="big-rule">
+      <div class="big-rule-number">4</div>
+      <div class="big-rule-label">Trades Per Day. Maximum. No Exceptions.</div>
+      <div class="big-rule-sub">
+        Not 4 unless 4/4 wins. Not 4 unless it feels right.<br>
+        4 trades. Session over. P&L irrelevant.<br><br>
+        At 75% win rate, the probability of going 4/4 is 31.6% — roughly 1 in 3 days you'll be at 4/4 looking for a reason to take trade 5. That's the rule's most dangerous moment, not its rarest.
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div class="insight yellow">
+        <div class="insight-label">Why Dollar Stops Don't Work Here</div>
+        <div class="insight-text">
+          A dollar stop says you can keep trading until you lose X. That leaves the door open for trades 8, 9, 10 on a good day that turns. <strong>4 trades closes the door regardless of P&L.</strong> A perfect 4/4 day is the best possible outcome — bank it and walk away.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRE-TRADE CHECKLIST -->
+  <section class="fade-up">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Pre-Trade Checklist</h2>
+    </div>
+    <p style="font-family:var(--mono); font-size:12px; color:var(--text-dim); margin-bottom:24px;">All 5 must be green. Any empty box = no trade.</p>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <div class="checklist">
+        <div class="check-item">
+          <div class="check-box checked"></div>
+          <div class="check-content">
+            <div class="check-title">Time Window</div>
+            <div class="check-detail">
+              Am I in a prime or valid window?<br>
+              <span>✅ Prime: 09:00–09:30 / 10:30–11:00 / 13:00–14:00</span><br>
+              <span class="yellow">△ Valid: 09:30–10:00 / 12:00–13:00</span><br>
+              <span class="red">🚫 Avoid: 10:00–10:30 / 11:00–12:00 / 14:00+</span>
+            </div>
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="check-box checked"></div>
+          <div class="check-content">
+            <div class="check-title">ADX Shape</div>
+            <div class="check-detail">
+              Is ADX at <span>20 or above</span> AND rolling over from a peak?<br>
+              Not just the number — the trajectory. A curl down from 28 is the signal.
+            </div>
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="check-box checked"></div>
+          <div class="check-content">
+            <div class="check-title">RSI Entry Zone</div>
+            <div class="check-detail">
+              Long: RSI <span>50–70</span> preferred / 30–50 valid<br>
+              Short: RSI <span>&lt; 30</span> preferred / 30–50 marginal / <span class="red">50–70 = DO NOT SHORT</span>
+            </div>
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="check-box checked"></div>
+          <div class="check-content">
+            <div class="check-title">Cloud Width</div>
+            <div class="check-detail">
+              <span>0.15%+</span> preferred · 0.35%+ best<br>
+              Under 0.15% = thin structure, skip unless everything else is perfect
+            </div>
+          </div>
+        </div>
+        <div class="check-item">
+          <div class="check-box checked"></div>
+          <div class="check-content">
+            <div class="check-title">Trade Count</div>
+            <div class="check-detail">
+              Am I at <span>3 or fewer</span> trades today?<br>
+              <span class="red">At 4 = session is over. Close the platform.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONVERSATION FLOW -->
+  <section class="fade-up">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>How This Session Unfolded</h2>
+    </div>
+    <p style="font-family:var(--mono); font-size:12px; color:var(--text-dim); margin-bottom:32px;">
+      Export JSON → paste into Claude → ask questions. Every insight below came from that conversation.
+    </p>
+
+    <div class="flow-wrap">
+
+      <div class="flow-step">
+        <div class="flow-dot active">01</div>
+        <div class="flow-content">
+          <div class="flow-title">JSON Export → Core Stats</div>
+          <div class="flow-desc">43 LBT trades loaded. Win rate, P&L, profit factor, direction split calculated. Limit vs stop exit gap immediately visible: <em>$634 difference per trade.</em></div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-dot active">02</div>
+        <div class="flow-content">
+          <div class="flow-title">Rule Edge Analysis Surfaced the 15m Cloud Problem</div>
+          <div class="flow-desc">Cloud Align and RSI Extreme showed +24% edge. 15m Cloud showed −8.3%. Data flagged it — then a conversation about ADX explained <em>why a trend-following rule works against a reversal trader.</em></div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-dot active">03</div>
+        <div class="flow-content">
+          <div class="flow-title">"The Pop is the Setup, Not the Trade"</div>
+          <div class="flow-desc">A question about ADX lag led to the core reframe of the entire system. <em>The morning pop isn't your target. It's your setup.</em> Said in one sentence. Unprompted. Came from the trader, not the data.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-dot active">04</div>
+        <div class="flow-content">
+          <div class="flow-title">Time Analysis Revealed the 3-Trade Structure</div>
+          <div class="flow-desc">Time-of-day breakdown mapped directly onto NYSE session rhythm. Three prime windows. Two hard avoid zones. The <em>natural architecture of a trading day</em> emerged from the data.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-dot active">05</div>
+        <div class="flow-content">
+          <div class="flow-title">The Tilt Pattern Named and Quantified</div>
+          <div class="flow-desc">"Miss the chop breakout → try to catch it → 3 trades becomes 25." Described by the trader. The math confirmed it: <em>$125k–$187k annual potential on 2–3 clean trades/day.</em></div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-dot active">06</div>
+        <div class="flow-content">
+          <div class="flow-title">The 4-Trade Rule — And Why It Can't Have Exceptions</div>
+          <div class="flow-desc">Rule proposed. Immediately tested: <em>"4 unless 4/4 wins and there's a 5th."</em> Probability math killed the exception: 31.6% chance of 4/4 — not rare, every third day. Rule stands unconditionally.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-dot">07</div>
+        <div class="flow-content">
+          <div class="flow-title">Next: Build the LBT Dataset</div>
+          <div class="flow-desc">ADX 20–25 bucket has 6 trades. Needs 15–20 to confirm. RSI direction splits need 15+ per bucket. The checklist is a starting framework — <em>30–40 more LBT trades will refine it with your own data.</em></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-text">
+      Generated from a real LBT dataset using the Trade Journal AI Analysis system.<br>
+      43 trades. One conversation. Every finding above came from the data.<br><br>
+      <a href="https://chrispi5707-blip.github.io/trade-journal-v2/" target="_blank">trade-journal-v2 ↗</a>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>
